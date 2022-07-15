@@ -1,29 +1,23 @@
 const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const cookieParser = require("cookie-parser");
+const passport = require("passport"); // authentication
 
-module.exports = function () {
+module.exports = () => {
   const app = express();
-
-  app.use(cookieParser());
-  app.use(express.json());
-  app.use(morgan("test"));
+  app.use(cors());
+  app.use(morgan("dev"));
+  app.use(bodyParser.json());
   app.use(
-    express.urlencoded({
+    bodyParser.urlencoded({
+      limit: "50mb",
       extended: true,
-      limit: "100kb",
-      parameterLimit: "100",
+      parameterLimit: 1000,
     })
   );
-
+  app.use(passport.initialize());
+  require("../../middleware/passport")(passport);
   require("../routes")(app);
-
-  app.use((err, req, res, next) => {
-    console.log(err);
-    res.status(400).json({
-      message: "",
-    });
-  });
-
   return app;
 };
